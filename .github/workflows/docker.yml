@@ -1,0 +1,35 @@
+name: docker
+
+on:
+  push:
+  schedule:
+    - cron: 0 0 * * 0
+
+jobs:
+  cmp:
+    uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
+    with:
+      new: $(curl -s https://api.github.com/repos/upx/upx/releases/latest | jq -r .tag_name | cut -c2-)
+
+  docker:
+    needs: cmp
+    if: needs.cmp.outputs.changed
+    uses: WaterLemons2k/Docker/.github/workflows/docker.yml@main
+    with:
+      build-args: VERSION=${{ needs.cmp.outputs.version }}
+      tags: |
+        waterlemons2k/upx
+        waterlemons2k/upx:${{ needs.cmp.outputs.version }}
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
+
+  git:
+    needs: [cmp, docker]
+    if: needs.cmp.outputs.changed
+    uses: WaterLemons2k/.github/.github/workflows/git.yml@main
+    with:
+      run: |
+        VERSION=${{ needs.cmp.outputs.version }}
+        sed -i "4c Version: $VERSION" README.md
+        echo "$VERSION" >VERSION
+      commit_message: ${{ needs.cmp.outputs.version }}
