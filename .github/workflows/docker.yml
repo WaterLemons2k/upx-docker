@@ -11,6 +11,11 @@ jobs:
     with:
       new: $(curl -s https://api.github.com/repos/upx/upx/releases/latest | jq -r .tag_name | cut -c2-)
 
+  keep-scheduled-workflow-activity:
+    needs: cmp
+    if: needs.cmp.outputs.changed == 'false'
+    uses: WaterLemons2k/scheduled-workflow-activity-action/.github/workflows/reusable.yml@v1
+
   docker:
     needs: cmp
     if: needs.cmp.outputs.changed == 'true'
