@@ -1,7 +1,7 @@
 # upx
 
 Docker Image for [UPX](https://upx.github.io)  
-Version: 5.0.2
+Version: 5.1.0
 
 ## Getting Started
 
